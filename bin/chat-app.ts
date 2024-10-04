@@ -1,21 +1,21 @@
 #!/usr/bin/env node
-import 'source-map-support/register';
-import * as cdk from 'aws-cdk-lib';
-import { ChatAppStack } from '../lib/chat-app-stack';
+import "source-map-support/register";
+import * as cdk from "aws-cdk-lib";
+import { ChatAppStack } from "../lib/chat-app-stack";
+import { ChatDynamoDbStack } from "../lib/chat-dynamodb-stack";
+import { ChatLambdaStack } from "../lib/chat-lambda-stack";
+import { ChatApiStack } from "../lib/chat-api-stack";
 
 const app = new cdk.App();
-new ChatAppStack(app, 'ChatAppStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+new ChatAppStack(app, "ChatAppStack");
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
+const dynamoDbStack = new ChatDynamoDbStack(app, "ChatDynamoDbStack");
 
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
-});
+const lambdaStack = new ChatLambdaStack(
+    app,
+    "ChatLambdaStack",
+    dynamoDbStack.chatTable
+);
+
+new ChatApiStack(app, "ChatApiStack", lambdaStack.chatFunction);
